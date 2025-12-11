@@ -1,4 +1,7 @@
 # server.py
+# Author: Tom Chen
+# 2025 Dec 11
+
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
