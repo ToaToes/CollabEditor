@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Collaborative Editor</title>
+    <style>
+        textarea { width: 100%; height: 300px; }
+    </style>
+</head>
+<body>
+    <h1>Collaborative Text Editor</h1>
+    <textarea id="editor"></textarea>
+    
+    <script>
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = "192.168.1.81:8000"; // replace with server IP
+        const ws = new WebSocket(`${protocol}//${host}/ws`);
+        
+        const editor = document.getElementById("editor");
+        let isRemoteUpdate = false;
+
+        ws.onopen = () => {
+            console.log("WebSocket connected");
+
+            editor.addEventListener("input", () => {
+                if (!isRemoteUpdate && ws.readyState === WebSocket.OPEN) {
+                    ws.send(editor.value);
+                }
+            });
+        };
+
+        ws.onmessage = (event) => {
+            isRemoteUpdate = true;
+            editor.value = event.data;
+            isRemoteUpdate = false;
+        };
+    </script>
+</body>
+</html>
