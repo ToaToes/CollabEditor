@@ -1,11 +1,17 @@
 # server.py
-# Author: Tom Chen
-# 2025 Dec 11
+# Author: Tom
+# 2025/12/15 Update with command shell
+
+# source venv/bin/activate
+# python3 server.py
+
+# create command shell -> chmod +x run_server.command
 
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 import os
+import socket
 
 app = FastAPI()
 
@@ -47,10 +53,30 @@ async def websocket_endpoint(ws: WebSocket):
         print(f"Client disconnected: {ws.client}")
 
 
+# Utility function to get LAN IP
+def get_lan_ip():
+    """Detect the LAN IP of this machine"""
+    try:
+        # Connect to an external host, doesn't actually send data
+        s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+        s.connect(("8.8.8.8", 80))
+        ip = s.getsockname()[0]
+        s.close()
+        return ip
+    except Exception:
+        return "127.0.0.1"
+
+
 # Health check endpoint
 @app.get("/health")
 async def health_check():
     return {"status": "ok", "clients": len(clients)}
+
+
+@app.get("/server-info")
+def server_info():
+    lan_ip = get_lan_ip()
+    return {"lan_ip": lan_ip, "port": 8000}
 
 # Run the app with Uvicorn
 if __name__ == "__main__":
