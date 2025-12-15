@@ -8,15 +8,19 @@
 </head>
 <body>
     <h1>Collaborative Text Editor</h1>
+
+    <p id="serverInfo">Detecting server LAN IP...</p>
+
     <textarea id="editor"></textarea>
     
     <script>
-        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
-        const host = "192.168.1.81:8000"; // replace with server IP
-        const ws = new WebSocket(`${protocol}//${host}/ws`);
-        
         const editor = document.getElementById("editor");
         let isRemoteUpdate = false;
+
+        // Automatically use the same host as the webpage
+        const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+        const host = window.location.host;  // <-- MAGIC FIX
+        const ws = new WebSocket(`${protocol}//${host}/ws`);
 
         ws.onopen = () => {
             console.log("WebSocket connected");
@@ -34,5 +38,19 @@
             isRemoteUpdate = false;
         };
     </script>
+
+    <script>
+        fetch("/server-info")
+        .then(res => res.json())
+        .then(data => {
+            document.getElementById("serverInfo").textContent =
+                "Server connected at: " + data.lan_ip + ":" + data.port;
+        })
+        .catch(() => {
+            document.getElementById("serverInfo").textContent =
+                "Unable to detect server LAN IP";
+        });
+    </script>
+
 </body>
 </html>
